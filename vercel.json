@@ -2,7 +2,6 @@
   "buildCommand": "npm ci && npm run build -- --configuration production",
   "outputDirectory": "dist/demo",
   "framework": "angular",
-  "nodeVersion": "20.x",
   "rewrites": [
     {
       "source": "/(.*)",
