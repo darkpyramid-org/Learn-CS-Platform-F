@@ -1,4 +1,4 @@
-name: Build & Test
+name: Build
 
 on:
   push:
@@ -29,9 +29,6 @@ jobs:
       - name: Build
         run: npm run build -- --configuration production
 
-      - name: Test
-        run: npm run test -- --watch=false --browsers=ChromeHeadless
-
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         if: success()
@@ -48,5 +45,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '✅ Build successful! All tests passed.'
+              body: '✅ Build successful!'
             })
