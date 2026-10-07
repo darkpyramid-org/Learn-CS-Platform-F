@@ -1,5 +1,5 @@
 {
-  "name": "manetho",
+  "name": "@darkpyramid-org/manetho",
   "version": "1.0.0",
   "description": "Manetho — A digital journal exploring Ancient Egypt through history, archaeology, mythology, and discovery.",
   "private": false,
@@ -7,7 +7,15 @@
   "author": "Manetho",
   "repository": {
     "type": "git",
-    "url": "https://github.com/darkpyramid-org/Learn-CS-Platform-F"
+    "url": "https://github.com/darkpyramid-org/Manetho-Blog-F"
+  },
+  "files": [
+    "dist/demo/browser",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
     "ng": "ng",

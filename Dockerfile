@@ -8,6 +8,7 @@ RUN npm run build -- --configuration production
 
 # Production stage
 FROM nginx:alpine
+LABEL org.opencontainers.image.source="https://github.com/darkpyramid-org/Manetho-Blog-F"
 COPY --from=builder /app/dist/demo/browser /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
