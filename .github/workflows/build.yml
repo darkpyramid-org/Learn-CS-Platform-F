@@ -1,0 +1,55 @@
+name: Build & Test
+
+on:
+  push:
+    branches: [master, main, develop]
+  pull_request:
+    branches: [master, main, develop]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build -- --configuration production
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run test -- --watch=false --browsers=ChromeHeadless
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        if: success()
+        with:
+          name: dist-${{ matrix.node-version }}
+          path: dist/
+
+      - name: Comment PR with build status
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ Build successful! All tests passed.'
+            })
