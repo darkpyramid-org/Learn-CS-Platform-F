@@ -1,6 +1,6 @@
 {
   "buildCommand": "npm run build -- --configuration production",
-  "outputDirectory": "dist/manetho/browser",
+  "outputDirectory": "dist/demo",
   "env": {
     "NODE_ENV": "production"
   },
