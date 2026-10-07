@@ -2,9 +2,9 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 COPY . .
-RUN npm run build
+RUN npm run build -- --configuration production
 
 # Production stage
 FROM nginx:alpine
