@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <rect width="800" height="600" fill="#d7c19a"/>
+  <rect x="1" y="1" width="798" height="598" fill="none" stroke="#b08a3c" stroke-width="2" stroke-dasharray="8,4"/>
+  <text x="400" y="290" font-family="Georgia, serif" font-size="24" fill="#171512" text-anchor="middle">Image Unavailable</text>
+  <text x="400" y="320" font-family="Georgia, serif" font-size="16" fill="#564c41" text-anchor="middle">Manetho</text>
+</svg>

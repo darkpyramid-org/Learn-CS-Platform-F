@@ -1,0 +1,11 @@
+src
+dist
+node_modules
+.git
+.gitignore
+*.md
+Dockerfile
+.dockerignore
+nginx.conf
+.github
+.docker

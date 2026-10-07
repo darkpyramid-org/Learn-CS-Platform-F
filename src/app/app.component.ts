@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { NavbarComponent } from './components/navbar.component';
-import { FooterComponent } from './components/footer.component';
+import { NavbarComponent } from './shared/navbar/navbar.component';
+import { FooterComponent } from './shared/footer/footer.component';
 
 @Component({
   selector: 'app-root',
@@ -9,7 +9,7 @@ import { FooterComponent } from './components/footer.component';
   imports: [RouterOutlet, NavbarComponent, FooterComponent],
   template: `
     <app-navbar />
-    <main class="pt-16 lg:pt-20 min-h-screen">
+    <main class="min-h-screen pt-20 lg:pt-24">
       <router-outlet />
     </main>
     <app-footer />

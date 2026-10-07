@@ -1,58 +1,45 @@
 import { Component, Input } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
 import { Article } from '../../core/models/article.model';
+import { ImgPlaceholderDirective } from '../../shared/img-placeholder/img-placeholder.directive';
 
 @Component({
   selector: 'app-article-card',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterLink, ImgPlaceholderDirective],
   template: `
-    <article class="card-editorial flex flex-col h-full hover:shadow-xl transition-all duration-300">
-      <a [routerLink]="['/articles', article.slug]" class="overflow-hidden block">
-        <div class="relative aspect-video bg-charcoal-200 dark:bg-charcoal-700 overflow-hidden">
+    <article class="card-editorial group">
+      <a [routerLink]="['/articles', article.slug]" class="block">
+        <div class="aspect-[16/10] overflow-hidden relative bg-charcoal-100/50 dark:bg-charcoal-800/50">
           <img
-            [src]="article.coverImage"
+            appImgPlaceholder
+            [appImgPlaceholder]="article.coverImage"
             [alt]="article.coverImageAlt"
-            class="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-            loading="lazy"
-          />
-          <div class="absolute top-3 left-3">
-            <span class="inline-block px-3 py-1 bg-gold-600 text-white text-xs font-semibold rounded-full">
-              {{ article.category }}
-            </span>
+            class="w-full h-full object-cover transition-all duration-700 ease-out opacity-0"
+            loading="lazy">
+          <!-- Loading skeleton -->
+          <div class="absolute inset-0 animate-pulse bg-gradient-to-r from-charcoal-100 via-charcoal-200 to-charcoal-100 dark:from-charcoal-800 dark:via-charcoal-700 dark:to-charcoal-800" [class.hidden]="!article.coverImage"></div>
+        </div>
+        <div class="p-6">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="tag">{{ article.category }}</span>
+            <span class="text-xs text-charcoal-400 dark:text-ivory-500">{{ article.readingTime }} min read</span>
+          </div>
+          <h3 class="font-display text-xl font-bold text-charcoal-900 dark:text-ivory-100 mb-2 group-hover:text-gold-600 transition-colors line-clamp-2">
+            {{ article.title }}
+          </h3>
+          <p class="text-charcoal-600 dark:text-ivory-300 text-sm line-clamp-2 mb-4">{{ article.excerpt }}</p>
+          <div class="flex items-center gap-2 text-xs text-charcoal-500 dark:text-ivory-400">
+            <span>{{ article.author.name }}</span>
+            <span>&middot;</span>
+            <span>{{ article.publishedAt | date:'mediumDate' }}</span>
           </div>
         </div>
       </a>
-
-      <div class="flex-1 p-6 flex flex-col">
-        <a [routerLink]="['/articles', article.slug]" class="block group">
-          <h3 class="font-display text-lg md:text-xl font-bold text-charcoal-900 dark:text-ivory-100 mb-2 group-hover:text-gold-600 transition-colors">
-            {{ article.title }}
-          </h3>
-        </a>
-
-        <p class="text-charcoal-600 dark:text-ivory-400 text-sm leading-relaxed mb-4 flex-1">
-          {{ article.excerpt }}
-        </p>
-
-        <div class="flex items-center justify-between pt-4 border-t border-charcoal-200 dark:border-charcoal-700">
-          <div class="flex items-center gap-2 text-xs text-charcoal-500 dark:text-ivory-400">
-            <span>{{ article.publishedAt | date: 'MMM d, y' }}</span>
-            <span class="text-charcoal-300 dark:text-charcoal-600">•</span>
-            <span>{{ article.readingTime }} min read</span>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-2 mt-3 flex-wrap">
-          @for (tag of article.tags.slice(0, 2); track tag) {
-            <span class="tag text-xs">{{ tag }}</span>
-          }
-        </div>
-      </div>
     </article>
-  `
+  `,
 })
 export class ArticleCardComponent {
-  @Input() article!: Article;
+  @Input({ required: true }) article!: Article;
 }

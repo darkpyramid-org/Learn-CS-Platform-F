@@ -1,271 +1,150 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
 import { ArticleService } from '../../core/services/article.service';
 import { Article } from '../../core/models/article.model';
 import { ArticleCardComponent } from '../../shared/article-card/article-card.component';
+import { CategoryCardComponent } from '../../shared/category-card/category-card.component';
+import { NewsletterComponent } from '../../shared/newsletter/newsletter.component';
+import { ImgPlaceholderDirective } from '../../shared/img-placeholder/img-placeholder.directive';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule, ArticleCardComponent],
+  imports: [CommonModule, RouterLink, ArticleCardComponent, CategoryCardComponent, NewsletterComponent, ImgPlaceholderDirective],
   template: `
-    <div class="min-h-screen">
+    <div class="pt-16 lg:pt-20">
       <!-- Hero / Featured Story -->
-      @if (featuredArticle) {
-        <section class="relative py-16 md:py-24 bg-gradient-to-br from-charcoal-50 via-ivory-50 to-sand-50 dark:from-charcoal-950 dark:via-charcoal-900/50 dark:to-charcoal-900/30">
-          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid md:grid-cols-2 gap-12 items-center">
-              <!-- Featured Content -->
-              <div class="space-y-6">
-                <div class="inline-block">
-                  <span class="px-4 py-2 bg-gold-100 dark:bg-gold-900/30 text-gold-900 dark:text-gold-200 text-xs font-semibold rounded-full uppercase tracking-wide">
-                    Featured Story
-                  </span>
-                </div>
-                <h1 class="editorial-title">
-                  {{ featuredArticle.title }}
-                </h1>
-                <p class="editorial-subtitle">
-                  {{ featuredArticle.subtitle || featuredArticle.excerpt }}
-                </p>
-                <div class="flex items-center gap-4 text-sm text-charcoal-600 dark:text-ivory-400">
-                  <span>{{ featuredArticle.publishedAt | date: 'MMM d, y' }}</span>
-                  <span class="text-charcoal-400">•</span>
-                  <span>{{ featuredArticle.readingTime }} min read</span>
-                </div>
-                <a [routerLink]="['/articles', featuredArticle.slug]" class="btn-primary inline-block">
-                  Read the Story
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </a>
-              </div>
-
-              <!-- Featured Image -->
-              <div class="overflow-hidden rounded-lg">
-                <img
-                  [src]="featuredArticle.coverImage"
-                  [alt]="featuredArticle.coverImageAlt"
-                  class="w-full h-96 object-cover rounded-lg"
-                />
-              </div>
+      <section class="relative bg-charcoal-900 text-ivory-100 overflow-hidden">
+        <div class="absolute inset-0">
+          <img
+            appImgPlaceholder
+            [appImgPlaceholder]="featuredArticle()?.coverImage"
+            [alt]="featuredArticle()?.coverImageAlt"
+            class="w-full h-full object-cover opacity-40 transition-all duration-1000 ease-out"
+            loading="eager">
+          <div class="absolute inset-0 bg-gradient-to-t from-charcoal-900 via-charcoal-900/60 to-transparent"></div>
+          <div class="absolute inset-0 animate-pulse bg-gradient-to-r from-charcoal-800 via-charcoal-700 to-charcoal-800" [class.hidden]="featuredArticle()?.coverImage"></div>
+        </div>
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-36">
+          <div class="max-w-3xl">
+            <div class="flex items-center gap-3 mb-6">
+              <span class="tag bg-gold-500/20 text-gold-400 border-gold-500/30">{{ featuredArticle()?.category }}</span>
+              <span class="text-ivory-400 text-sm">{{ featuredArticle()?.readingTime }} min read</span>
             </div>
-          </div>
-        </section>
-      }
-
-      <!-- Latest Articles Section -->
-      <section class="py-16 md:py-24">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="mb-12">
-            <h2 class="section-header mb-4">Latest Articles</h2>
-            <p class="section-subheader">
-              Explore our recent historical investigations and discoveries
+            <h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+              {{ featuredArticle()?.title }}
+            </h1>
+            <p class="font-serif text-xl md:text-2xl text-ivory-300 leading-relaxed mb-8">
+              {{ featuredArticle()?.excerpt }}
             </p>
+            <div class="flex items-center gap-4 mb-8">
+              <span class="text-ivory-400 text-sm">By {{ featuredArticle()?.author?.name }}</span>
+              <span class="text-ivory-500">&middot;</span>
+              <span class="text-ivory-400 text-sm">{{ featuredArticle()?.publishedAt | date:'longDate' }}</span>
+            </div>
+            <a [routerLink]="['/articles', featuredArticle()?.slug]" class="btn-gold text-lg px-8 py-4">
+              Read the Story
+            </a>
           </div>
-
-          @if (latestArticles.length > 0) {
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-              @for (article of latestArticles.slice(0, 6); track article.id) {
-                <app-article-card [article]="article" />
-              }
-            </div>
-
-            <div class="text-center">
-              <a routerLink="/articles" class="btn-outline">
-                View All Articles
-              </a>
-            </div>
-          }
         </div>
       </section>
 
-      <!-- Categories Section -->
-      <section class="py-16 md:py-24 bg-charcoal-50 dark:bg-charcoal-900/50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="mb-12">
-            <h2 class="section-header mb-4">Explore by Category</h2>
-            <p class="section-subheader">
-              Discover Egypt's history organized by subject
-            </p>
+      <!-- Latest Articles -->
+      <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+        <div class="flex items-end justify-between mb-12">
+          <div>
+            <h2 class="section-header">Latest Articles</h2>
+            <p class="section-subheader">Recent stories from the world of Ancient Egypt</p>
           </div>
+          <a routerLink="/articles" class="hidden sm:inline-flex items-center gap-2 text-gold-600 font-medium hover:text-gold-700 transition-colors">
+            View all articles <span>&rarr;</span>
+          </a>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <app-article-card *ngFor="let article of latestArticles()" [article]="article" />
+        </div>
+        <div class="mt-8 text-center sm:hidden">
+          <a routerLink="/articles" class="btn-outline">View all articles</a>
+        </div>
+      </section>
 
-          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @for (category of categories; track category.slug) {
-              <a [routerLink]="['/articles']" [queryParams]="{ category: category.name }" class="group card-editorial p-8 text-center">
-                <div class="text-4xl mb-4">{{ category.emoji }}</div>
-                <h3 class="font-display text-2xl font-bold text-charcoal-900 dark:text-ivory-100 mb-2 group-hover:text-gold-600 transition-colors">
-                  {{ category.name }}
-                </h3>
-                <p class="text-charcoal-600 dark:text-ivory-400 text-sm">
-                  {{ category.description }}
-                </p>
-                <span class="inline-block mt-4 text-xs font-semibold text-gold-600 group-hover:text-gold-700">
-                  {{ category.count }} articles →
-                </span>
-              </a>
-            }
+      <!-- Categories -->
+      <section class="bg-ivory-200/50 dark:bg-charcoal-900/50 py-16 lg:py-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="text-center mb-12">
+            <h2 class="section-header">Explore by Category</h2>
+            <p class="section-subheader max-w-2xl mx-auto">Discover the many facets of Ancient Egyptian civilization</p>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <app-category-card *ngFor="let category of categories" [category]="category" />
           </div>
         </div>
       </section>
 
       <!-- Editorial Pillars -->
-      <section class="py-16 md:py-24">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="mb-12">
-            <h2 class="section-header mb-4">What is Manetho?</h2>
+      <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+        <div class="text-center mb-12">
+          <h2 class="section-header">The Manetho Approach</h2>
+          <p class="section-subheader max-w-2xl mx-auto">Rigorous scholarship, accessible writing, and respect for the evidence</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div class="text-center p-8">
+            <div class="w-16 h-16 bg-gold-100 dark:bg-gold-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-gold-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+            </div>
+            <h3 class="font-display text-xl font-bold text-charcoal-900 dark:text-ivory-100 mb-3">Scholarly Rigor</h3>
+            <p class="text-charcoal-600 dark:text-ivory-300 text-sm leading-relaxed">Every article is grounded in archaeological evidence and peer-reviewed research, with sources clearly cited.</p>
           </div>
-
-          <div class="grid md:grid-cols-3 gap-8">
-            <div class="space-y-4">
-              <div class="w-16 h-16 rounded-lg bg-gold-100 dark:bg-gold-900/30 flex items-center justify-center">
-                <span class="text-3xl">📚</span>
-              </div>
-              <h3 class="font-display text-xl font-bold text-charcoal-900 dark:text-ivory-100">
-                Historical Scholarship
-              </h3>
-              <p class="text-charcoal-600 dark:text-ivory-400">
-                Deep dives into Ancient Egypt grounded in archaeological evidence, scholarly research, and primary sources.
-              </p>
+          <div class="text-center p-8">
+            <div class="w-16 h-16 bg-lapis-100 dark:bg-lapis-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-lapis-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
             </div>
-
-            <div class="space-y-4">
-              <div class="w-16 h-16 rounded-lg bg-gold-100 dark:bg-gold-900/30 flex items-center justify-center">
-                <span class="text-3xl">🏛️</span>
-              </div>
-              <h3 class="font-display text-xl font-bold text-charcoal-900 dark:text-ivory-100">
-                Editorial Excellence
-              </h3>
-              <p class="text-charcoal-600 dark:text-ivory-400">
-                Beautifully written, meticulously researched articles that make history accessible without sacrificing rigor.
-              </p>
+            <h3 class="font-display text-xl font-bold text-charcoal-900 dark:text-ivory-100 mb-3">Accessible Writing</h3>
+            <p class="text-charcoal-600 dark:text-ivory-300 text-sm leading-relaxed">Complex historical topics presented in clear, engaging prose that respects the reader's intelligence.</p>
+          </div>
+          <div class="text-center p-8">
+            <div class="w-16 h-16 bg-sand-100 dark:bg-sand-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-sand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
             </div>
-
-            <div class="space-y-4">
-              <div class="w-16 h-16 rounded-lg bg-gold-100 dark:bg-gold-900/30 flex items-center justify-center">
-                <span class="text-3xl">🔍</span>
-              </div>
-              <h3 class="font-display text-xl font-bold text-charcoal-900 dark:text-ivory-100">
-                Intellectual Honesty
-              </h3>
-              <p class="text-charcoal-600 dark:text-ivory-400">
-                We distinguish between established facts, scholarly interpretation, and unsolved mysteries in ancient Egypt.
-              </p>
-            </div>
+            <h3 class="font-display text-xl font-bold text-charcoal-900 dark:text-ivory-100 mb-3">Evidence First</h3>
+            <p class="text-charcoal-600 dark:text-ivory-300 text-sm leading-relaxed">We distinguish between established facts, scholarly interpretations, and unresolved questions.</p>
           </div>
         </div>
       </section>
 
-      <!-- Newsletter Section -->
-      <section class="py-16 md:py-24 bg-charcoal-900 dark:bg-charcoal-950">
-        <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 class="font-display text-3xl md:text-4xl font-bold text-ivory-100 mb-4">
-            The Manetho Dispatch
-          </h2>
-          <p class="text-lg text-ivory-300 mb-8">
-            Receive new discoveries, historical stories, and insights from Ancient Egypt — delivered occasionally to your inbox.
-          </p>
-
-          <form (submit)="onNewsletterSubmit($event)" class="flex gap-3">
-            <input
-              type="email"
-              [(ngModel)]="newsletterEmail"
-              name="email"
-              placeholder="Enter your email"
-              class="newsletter-input flex-1"
-              required
-            />
-            <button type="submit" class="btn-primary px-8">
-              Subscribe
-            </button>
-          </form>
-          <p class="text-xs text-ivory-400 mt-4">
-            We respect your privacy. Unsubscribe at any time.
-          </p>
-        </div>
+      <!-- Newsletter -->
+      <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 lg:pb-24">
+        <app-newsletter />
       </section>
     </div>
   `,
 })
 export class HomeComponent implements OnInit {
-  featuredArticle: Article | undefined;
-  latestArticles: Article[] = [];
-  newsletterEmail = '';
+  private articleService = inject(ArticleService);
+
+  featuredArticle = signal<Article | undefined>(undefined);
+  latestArticles = signal<Article[]>([]);
 
   categories = [
-    {
-      slug: 'ancient-egypt',
-      name: 'Ancient Egypt',
-      description: 'Civilization, society, government, and daily life',
-      emoji: '🏺',
-      count: 0
-    },
-    {
-      slug: 'pharaohs',
-      name: 'Pharaohs',
-      description: 'Biographies and reigns of Egyptian rulers',
-      emoji: '👑',
-      count: 0
-    },
-    {
-      slug: 'archaeology',
-      name: 'Archaeology',
-      description: 'Excavations, tombs, temples, and artifacts',
-      emoji: '🔨',
-      count: 0
-    },
-    {
-      slug: 'mythology',
-      name: 'Mythology',
-      description: 'Gods, creation myths, rituals, and beliefs',
-      emoji: '⚡',
-      count: 0
-    },
-    {
-      slug: 'discoveries',
-      name: 'Discoveries',
-      description: 'Recent archaeological findings and research',
-      emoji: '✨',
-      count: 0
-    },
-    {
-      slug: 'artifacts',
-      name: 'Artifacts',
-      description: 'Important objects and their significance',
-      emoji: '💎',
-      count: 0
-    }
+    { slug: 'ancient-egypt', title: 'Ancient Egypt', description: 'Civilization, society, government, and daily life in the Nile Valley.', image: 'https://images.unsplash.com/photo-1568322445389-f64ac2515020?w=800', articleCount: 5 },
+    { slug: 'pharaohs', title: 'Pharaohs', description: 'Biographies and reigns of Egypt\'s divine rulers.', image: 'https://images.unsplash.com/photo-1553913861-c0fddf2619ee?w=800', articleCount: 10 },
+    { slug: 'archaeology', title: 'Archaeology', description: 'Excavations, tombs, temples, and the methods that uncover the past.', image: 'https://images.unsplash.com/photo-1590133324192-1df305deeefc?w=800', articleCount: 4 },
+    { slug: 'mythology', title: 'Mythology', description: 'Gods, creation myths, rituals, and beliefs about the afterlife.', image: 'https://images.unsplash.com/photo-1562779830-2403d77b5bc5?w=800', articleCount: 3 },
+    { slug: 'discoveries', title: 'Discoveries', description: 'Recent archaeological finds and historical research.', image: 'https://images.unsplash.com/photo-1539650116574-8efeb43e2750?w=800', articleCount: 3 },
+    { slug: 'artifacts', title: 'Artifacts', description: 'Important objects and what they reveal about Egyptian civilization.', image: 'https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?w=800', articleCount: 2 },
   ];
 
-  constructor(private articleService: ArticleService) {}
-
-  ngOnInit(): void {
-    const allArticles = this.articleService.getAllArticles();
-
-    // Set featured article (first featured or most recent)
-    this.featuredArticle = allArticles.find(a => a.featured) || allArticles[0];
-
-    // Set latest articles
-    this.latestArticles = this.articleService.getLatestArticles(12);
-
-    // Count articles by category
-    this.categories.forEach(category => {
-      category.count = allArticles.filter(a => a.category === category.name).length;
-    });
-  }
-
-  onNewsletterSubmit(event: Event): void {
-    event.preventDefault();
-    if (this.newsletterEmail) {
-      // In a real app, this would call an API
-      const emails = JSON.parse(localStorage.getItem('newsletterSubscribers') || '[]');
-      if (!emails.includes(this.newsletterEmail)) {
-        emails.push(this.newsletterEmail);
-        localStorage.setItem('newsletterSubscribers', JSON.stringify(emails));
-      }
-      alert('Thank you for subscribing!');
-      this.newsletterEmail = '';
-    }
+  ngOnInit() {
+    const all = this.articleService.getAll();
+    this.featuredArticle.set(all.find(a => a.featured) || all[0]);
+    this.latestArticles.set(all.filter(a => !a.featured).slice(0, 6));
   }
 }

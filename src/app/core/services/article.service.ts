@@ -1,84 +1,28 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { Article } from '../models/article.model';
 import { articles } from '../data/articles';
+import { Article } from '../models/article.model';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class ArticleService {
-  private articlesSubject = new BehaviorSubject<Article[]>(articles);
-  articles$ = this.articlesSubject.asObservable();
+  private articles = articles;
 
-  constructor() {}
-
-  getAllArticles(): Article[] {
-    return articles;
+  getAll(): Article[] {
+    return this.articles;
   }
 
-  getArticles(): Observable<Article[]> {
-    return this.articles$;
+  getBySlug(slug: string): Article | undefined {
+    return this.articles.find(a => a.slug === slug);
   }
 
-  getArticleBySlug(slug: string): Article | undefined {
-    return articles.find(article => article.slug === slug);
+  getBySlugs(slugs: string[]): Article[] {
+    return slugs.map(s => this.getBySlug(s)).filter((a): a is Article => !!a);
   }
 
-  getArticlesByCategory(category: string): Article[] {
-    return articles.filter(article => article.category === category);
+  getByCategory(category: string): Article[] {
+    return this.articles.filter(a => a.category.toLowerCase() === category.toLowerCase());
   }
 
-  getFeaturedArticles(): Article[] {
-    return articles.filter(article => article.featured).slice(0, 3);
-  }
-
-  getLatestArticles(limit: number = 10): Article[] {
-    return articles
-      .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
-      .slice(0, limit);
-  }
-
-  getRelatedArticles(articleSlug: string, limit: number = 3): Article[] {
-    const article = this.getArticleBySlug(articleSlug);
-    if (!article || !article.relatedArticles) {
-      return [];
-    }
-
-    return articles
-      .filter(a => article.relatedArticles?.includes(a.slug))
-      .slice(0, limit);
-  }
-
-  searchArticles(query: string): Article[] {
-    const lowerQuery = query.toLowerCase();
-    return articles.filter(article =>
-      article.title.toLowerCase().includes(lowerQuery) ||
-      article.excerpt.toLowerCase().includes(lowerQuery) ||
-      article.tags.some(tag => tag.toLowerCase().includes(lowerQuery)) ||
-      article.category.toLowerCase().includes(lowerQuery)
-    );
-  }
-
-  getCategories(): string[] {
-    const categories = new Set(articles.map(article => article.category));
-    return Array.from(categories).sort();
-  }
-
-  getArticlesByTag(tag: string): Article[] {
-    return articles.filter(article => article.tags.includes(tag));
-  }
-
-  getTags(): string[] {
-    const tags = new Set<string>();
-    articles.forEach(article => {
-      article.tags.forEach(tag => tags.add(tag));
-    });
-    return Array.from(tags).sort();
-  }
-
-  getReadingTime(content: string): number {
-    const wordsPerMinute = 200;
-    const words = content.split(/\s+/).length;
-    return Math.ceil(words / wordsPerMinute);
+  getFeatured(): Article[] {
+    return this.articles.filter(a => a.featured);
   }
 }

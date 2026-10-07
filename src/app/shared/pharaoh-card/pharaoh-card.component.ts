@@ -1,55 +1,35 @@
 import { Component, Input } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
 import { Pharaoh } from '../../core/models/pharaoh.model';
+import { ImgPlaceholderDirective } from '../../shared/img-placeholder/img-placeholder.directive';
 
 @Component({
   selector: 'app-pharaoh-card',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterLink, ImgPlaceholderDirective],
   template: `
-    <article class="card-editorial flex flex-col h-full hover:shadow-xl transition-all duration-300">
-      <a [routerLink]="['/pharaohs', pharaoh.slug]" class="overflow-hidden block">
-        <div class="relative aspect-square bg-charcoal-200 dark:bg-charcoal-700 overflow-hidden">
-          <img
-            [src]="pharaoh.image"
-            [alt]="pharaoh.imageAlt"
-            class="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-            loading="lazy"
-          />
-          <div class="absolute inset-0 bg-gradient-to-t from-charcoal-900/80 to-transparent"></div>
-          <div class="absolute bottom-4 left-4 right-4">
-            <span class="inline-block px-3 py-1 bg-gold-600 text-white text-xs font-semibold rounded-full mb-2">
-              {{ pharaoh.dynasty }}
-            </span>
-            <h3 class="font-display text-xl font-bold text-ivory-100">
-              {{ pharaoh.name }}
-            </h3>
-          </div>
-        </div>
-      </a>
-
-      <div class="flex-1 p-6 flex flex-col">
-        <p class="text-charcoal-600 dark:text-ivory-400 text-sm mb-4 flex-1">
-          {{ pharaoh.biography.substring(0, 150) }}...
-        </p>
-
-        <div class="space-y-2 text-xs text-charcoal-600 dark:text-ivory-400 mb-4 pt-4 border-t border-charcoal-200 dark:border-charcoal-700">
-          <div>
-            <span class="font-semibold">Reign:</span> {{ pharaoh.approximateDates }}
-          </div>
-          <div>
-            <span class="font-semibold">Period:</span> {{ pharaoh.period }}
-          </div>
-        </div>
-
-        <a [routerLink]="['/pharaohs', pharaoh.slug]" class="btn-outline text-sm text-center">
-          View Profile
-        </a>
+    <a [routerLink]="['/pharaohs', pharaoh.slug]" class="card-editorial group block">
+      <div class="aspect-[4/5] overflow-hidden relative bg-charcoal-100/50 dark:bg-charcoal-800/50">
+        <img
+          appImgPlaceholder
+          [appImgPlaceholder]="pharaoh.image"
+          [alt]="pharaoh.imageAlt"
+          class="w-full h-full object-cover transition-all duration-700 ease-out opacity-0"
+          loading="lazy">
+        <div class="absolute inset-0 animate-pulse bg-gradient-to-r from-charcoal-100 via-charcoal-200 to-charcoal-100 dark:from-charcoal-800 dark:via-charcoal-700 dark:to-charcoal-800"></div>
       </div>
-    </article>
-  `
+      <div class="p-6">
+        <div class="text-xs text-gold-600 font-medium mb-2">{{ pharaoh.dynasty }}</div>
+        <h3 class="font-display text-xl font-bold text-charcoal-900 dark:text-ivory-100 mb-1 group-hover:text-gold-600 transition-colors">
+          {{ pharaoh.name }}
+        </h3>
+        <p class="text-sm text-charcoal-500 dark:text-ivory-400 mb-3">{{ pharaoh.reign }}</p>
+        <p class="text-sm text-charcoal-600 dark:text-ivory-300 line-clamp-2">{{ pharaoh.biography | slice:0:120 }}...</p>
+      </div>
+    </a>
+  `,
 })
 export class PharaohCardComponent {
-  @Input() pharaoh!: Pharaoh;
+  @Input({ required: true }) pharaoh!: Pharaoh;
 }
