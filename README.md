@@ -180,11 +180,11 @@ All historical content follows scholarly standards:
 
 ## Deployment
 
-The `dist/` folder from `ng build` is ready for deployment to:
-- Netlify (netlify.toml configured)
-- Vercel
-- Firebase Hosting
+The `dist/manetho/browser` folder from `ng build` is ready for deployment to:
+- **Vercel** (recommended) - automatic deployments from GitHub
+- Docker - containerized deployment
 - AWS S3 + CloudFront
+- Firebase Hosting
 - Any static hosting provider
 
 ## Future Enhancements

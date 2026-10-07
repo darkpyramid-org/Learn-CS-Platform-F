@@ -28,7 +28,7 @@ http://localhost:4200
 # Build optimized production bundle
 ng build --configuration production
 
-# Output directory: dist/
+# Output directory: dist/manetho/browser
 ```
 
 ## Development
@@ -57,28 +57,36 @@ src/
 └── index.html          # HTML template
 ```
 
-## Environment Variables
-
-Copy `.env.example` to `.env` and configure:
-
-```bash
-API_URL=http://localhost:3000
-ENVIRONMENT=development
-```
-
 ## Deployment
 
+### Vercel (Recommended)
+
+**Option 1: Deploy from CLI**
+```bash
+npm install -g vercel
+vercel deploy
+```
+
+**Option 2: Connect GitHub**
+1. Go to [vercel.com](https://vercel.com)
+2. Connect your GitHub account
+3. Import this repository
+4. Vercel automatically builds and deploys on push
+
 ### Docker
+
 ```bash
 docker build -t manetho .
 docker run -p 80:80 manetho
+
+# Or use docker-compose
+docker-compose up
 ```
 
-### Netlify
-```bash
-npm run build
-# Deploy dist/ folder
-```
+### Other Static Hosting
 
-### Other Hosts
-Deploy `dist/` folder to any static hosting.
+Deploy `dist/manetho/browser` folder to:
+- AWS S3 + CloudFront
+- Firebase Hosting
+- GitHub Pages
+- Any static hosting provider
